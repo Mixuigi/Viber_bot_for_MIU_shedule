@@ -38,7 +38,7 @@ HEADERS_FOR_SHEDULE = {
 HEADERS_FOR_PARSE = {
     'User-Agent': 'Mozilla/5.0'
 }
-
+current_timestamp = []
 app = Flask(__name__, static_url_path='/static')
 viber = Api(BotConfiguration(
     name='MIU Bot',
@@ -52,7 +52,7 @@ cur.execute('''CREATE TABLE IF NOT EXISTS tgdata
                (tgid integer , miuGroup text)''')
 database.commit()
 
-ngrok_http = 'https://10cb-37-214-62-12.eu.ngrok.io'
+ngrok_http = 'https://abfe-37-214-73-148.eu.ngrok.io'
 
 
 def delete_data_sql(viber_request):
@@ -183,6 +183,12 @@ def incoming():
     viber_request = viber.parse_request(request.get_data())
 
     if isinstance(viber_request, ViberMessageRequest):
+        message_timestamp = viber_request.timestamp
+        if current_timestamp.count(message_timestamp) != 0:
+            return Response(status=200)
+        if len(current_timestamp) >= 30:
+            del current_timestamp[0]
+        current_timestamp.append(message_timestamp)
         try:
             random_str = generate_random_str()
             if viber_request.message.text == 'this_week':
